@@ -1,8 +1,15 @@
 
-docker: docker-build docker-run
+commit=save changes
 
-docker-run:
-	docker run --name=db_access_cont -dp 5000:5000 db_access
+dinit:
+	docker-compose up -d --build
 
-docker-build:
-	docker build -t db_access .
+dreinit: ddown dinit
+
+ddown:
+	docker-compose down
+
+git-push:
+	git add .
+	git commit -m "$(commit)"
+	git push
