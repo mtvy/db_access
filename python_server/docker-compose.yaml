@@ -37,9 +37,9 @@ services:
       - "pg_stat_statements.track=all"
       - -p 5433
     environment:
-      POSTGRES_DB: "items_db"
-      POSTGRES_USER: "items_user"
-      POSTGRES_PASSWORD: "items"
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - ./configs/database/postgresql.conf:/etc/postgresql.conf
@@ -48,7 +48,7 @@ services:
     ports:
       - "5433:5433"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U items_user -d items_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -66,9 +66,9 @@ services:
     container_name: exporter_container
     image: prometheuscommunity/postgres-exporter:v0.10.0
     environment:
-      DATA_SOURCE_URI: "postgres:5433/items_user?sslmode=disable"
-      DATA_SOURCE_USER: "items_user"
-      DATA_SOURCE_PASS: "items"
+      DATA_SOURCE_URI: "postgres:5433/postgres?sslmode=disable"
+      DATA_SOURCE_USER: "postgres"
+      DATA_SOURCE_PASS: "postgres"
       PG_EXPORTER_EXTEND_QUERY_PATH: "/postgres_exporter/queries.yaml"
     volumes:
       - ./configs/exporter/queries.yaml:/postgres_exporter/queries.yaml:ro
