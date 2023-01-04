@@ -19,7 +19,7 @@ public class ClientTest extends TestCase {
 
     public void testApp()
     {
-        Client client = new Client();
+        Client client = new Client("0.0.0.0:8080");
 
         System.out.println(client.getDb("qrcodes_tb"));
 

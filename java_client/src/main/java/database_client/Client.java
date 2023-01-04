@@ -9,10 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Client {
-    final String HOST = "localhost:8080";
+    String host = "0.0.0.0:8080";
 
-    public ManagedChannel getChan(String host) {
-        return ManagedChannelBuilder.forTarget(host).usePlaintext().build();
+    public Client(String host) {
+        this.host = host;
+    }
+
+    public ManagedChannel getChan() {
+        return ManagedChannelBuilder.forTarget(this.host).usePlaintext().build();
     }
 
     public DatabaseGrpc.DatabaseBlockingStub getConn(ManagedChannel channel) {
@@ -20,7 +24,7 @@ public class Client {
     }
 
     public DatabaseOuterClass.GetDbResponse getDb(String tb) {
-        ManagedChannel channel = getChan(HOST);
+        ManagedChannel channel = getChan();
         DatabaseGrpc.DatabaseBlockingStub stub = getConn(channel);
 
 
@@ -35,7 +39,7 @@ public class Client {
     }
 
     public DatabaseOuterClass.InsertDbResponse insertDb(List<String> colums, List<String> values) {
-        ManagedChannel channel = getChan(HOST);
+        ManagedChannel channel = getChan();
         DatabaseGrpc.DatabaseBlockingStub stub = getConn(channel);
 
 
@@ -51,7 +55,7 @@ public class Client {
     }
 
     public DatabaseOuterClass.DeleteDbResponse deleteDb(String tb, String where) {
-        ManagedChannel channel = getChan(HOST);
+        ManagedChannel channel = getChan();
         DatabaseGrpc.DatabaseBlockingStub stub = getConn(channel);
 
         DatabaseOuterClass.DeleteDbRequest request = DatabaseOuterClass.DeleteDbRequest.newBuilder()
