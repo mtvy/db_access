@@ -1,3 +1,7 @@
 # db_access
 
-protoc -I ./proto --java_out=./api --kotlin_out=.api ../api/proto/database.proto
+## Java Client
+- built at IntelliJ IDEA CE 
+```java
+import java_client.src.main.java.database_client.Client
+```

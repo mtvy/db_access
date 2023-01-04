@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package api;
+
+
+service Database {
+  rpc GetDb    (GetDbRequest)    returns (GetDbResponse)    {}
+  rpc InsertDb (InsertDbRequest) returns (InsertDbResponse) {}
+  rpc DeleteDb (DeleteDbRequest) returns (DeleteDbResponse) {}
+}
+
+message GetDbRequest {
+  string tb = 1;
+}
+
+message GetDbResponse {
+  uint32 status = 1;
+  string data = 2;
+}
+
+
+message InsertDbRequest {
+  string tb = 1;
+  repeated string colums = 2;
+  repeated string values = 3; // TODO: edit string type of vals
+}
+
+message InsertDbResponse {
+  uint32 status = 1;
+}
+
+message DeleteDbRequest {
+  string tb = 1;
+  string where = 2; // <param1>='<val1>' AND ...
+}
+
+message DeleteDbResponse {
+  uint32 status = 1;
+}
