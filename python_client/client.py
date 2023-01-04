@@ -17,15 +17,15 @@ def run():
 
         print(res)
 
-        req = api.InsertDbRequest(tb=TB, colums=['url', 'initer'], values=['hello.ru', 'me'])
-        res = stub.InsertDb(req)
+        #req = api.InsertDbRequest(tb=TB, colums=['url', 'initer'], values=['hello.ru', 'me'])
+        #res = stub.InsertDb(req)
 
-        print(res)
+        #print(res)
 
-        req = api.DeleteDbRequest(tb=TB, where="url='hello.ru'")
-        res = stub.DeleteDb(req)
+        #req = api.DeleteDbRequest(tb=TB, where="url='hello.ru'")
+        #res = stub.DeleteDb(req)
 
-        print(res)
+        #print(res)
 
 
 if __name__ == "__main__":
