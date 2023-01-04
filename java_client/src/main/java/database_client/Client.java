@@ -9,48 +9,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Client {
-    public static void main(String[] args) {
+    final String HOST = "localhost:8080";
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget("localhost:8080")
-                .usePlaintext().build();
+    public ManagedChannel getChan(String host) {
+        return ManagedChannelBuilder.forTarget(host).usePlaintext().build();
+    }
 
-        DatabaseGrpc.DatabaseBlockingStub stub =
-                DatabaseGrpc.newBlockingStub(channel);
+    public DatabaseGrpc.DatabaseBlockingStub getConn(ManagedChannel channel) {
+        return DatabaseGrpc.newBlockingStub(channel);
+    }
 
-        DatabaseOuterClass.GetDbRequest get_request = DatabaseOuterClass.GetDbRequest
-                .newBuilder().setTb("qrcodes_tb").build();
-
-        DatabaseOuterClass.GetDbResponse get_response = stub.getDb(get_request);
-
-        System.out.println(get_response);
+    public DatabaseOuterClass.GetDbResponse getDb(String tb) {
+        ManagedChannel channel = getChan(HOST);
+        DatabaseGrpc.DatabaseBlockingStub stub = getConn(channel);
 
 
-        List<String> colums = new ArrayList<String>();
-        colums.add("url");
-        colums.add("initer");
+        DatabaseOuterClass.GetDbRequest request = DatabaseOuterClass.GetDbRequest
+                .newBuilder().setTb(tb).build();
 
-        List<String> values = new ArrayList<String>();
-        values.add("hello.ru");
-        values.add("me");
+        DatabaseOuterClass.GetDbResponse response = stub.getDb(request);
 
-        DatabaseOuterClass.InsertDbRequest insert_request = DatabaseOuterClass.InsertDbRequest.newBuilder()
+        channel.shutdownNow();
+
+        return response;
+    }
+
+    public DatabaseOuterClass.InsertDbResponse insertDb(List<String> colums, List<String> values) {
+        ManagedChannel channel = getChan(HOST);
+        DatabaseGrpc.DatabaseBlockingStub stub = getConn(channel);
+
+
+        DatabaseOuterClass.InsertDbRequest request = DatabaseOuterClass.InsertDbRequest.newBuilder()
                 .setTb("qrcodes_tb").addAllColums(colums).addAllValues(values)
                 .build();
 
-        DatabaseOuterClass.InsertDbResponse insert_response = stub.insertDb(insert_request);
-
-        System.out.println(insert_response);
-
-
-        DatabaseOuterClass.DeleteDbRequest delete_request = DatabaseOuterClass.DeleteDbRequest.newBuilder()
-                .setTb("qrcodes_tb").setWhere("url='hello.ru'")
-                .build();
-
-        DatabaseOuterClass.DeleteDbResponse delete_response = stub.deleteDb(delete_request);
-
-        System.out.println(delete_response);
-
+        DatabaseOuterClass.InsertDbResponse response = stub.insertDb(request);
 
         channel.shutdownNow();
+
+        return response;
+    }
+
+    public DatabaseOuterClass.DeleteDbResponse deleteDb(String tb, String where) {
+        ManagedChannel channel = getChan(HOST);
+        DatabaseGrpc.DatabaseBlockingStub stub = getConn(channel);
+
+        DatabaseOuterClass.DeleteDbRequest request = DatabaseOuterClass.DeleteDbRequest.newBuilder()
+                .setTb(tb).setWhere(where)
+                .build();
+
+        DatabaseOuterClass.DeleteDbResponse response = stub.deleteDb(request);
+
+        channel.shutdownNow();
+
+        return response;
     }
 }
