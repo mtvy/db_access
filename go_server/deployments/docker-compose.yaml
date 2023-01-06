@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    container_name: postgres_container
+    image: postgres:14.5
+    command: postgres -c config_file=/etc/postgresql.conf
+    environment:
+      POSTGRES_DB: "qrcodes_db"
+      POSTGRES_USER: "qrcodes_user"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./database/postgresql.conf:/etc/postgresql.conf
+      - ./database:/docker-entrypoint-initdb.d
+      - .:/var/lib/postgresql/data
+    ports:
+      - "5433:5433"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qrcodes_user -d qrcodes_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    networks:
+      - postgres
+
+  postgres_exporter:
+    container_name: exporter_container
+    image: prometheuscommunity/postgres-exporter:v0.10.0
+    environment:
+      DATA_SOURCE_URI: "postgres:5433/qrcodes_db?sslmode=disable"
+      DATA_SOURCE_USER: "qrcodes_user"
+      DATA_SOURCE_PASS: "postgres"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/postgres_exporter/queries.yaml"
+    volumes:
+      - ./exporter/queries.yaml:/postgres_exporter/queries.yaml:ro
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 500M
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
