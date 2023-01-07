@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/jackc/pgx/v4"
@@ -27,24 +28,32 @@ type Databaser interface {
 }
 
 type Database struct {
-	Host   string
-	pool   *pgxpool.Pool
-	rows   pgx.Rows
-	data   []interface{}
-	locker sync.RWMutex
-	stat   error
+	Host string
+
+	sync.RWMutex
+	pool *pgxpool.Pool
+	rows pgx.Rows
+	data []interface{}
+	stat error
 }
+
+var ErrToManyClients = errors.New("FATAL: sorry, too many clients already (SQLSTATE 53300)")
 
 func (db *Database) createConn() error {
 	//dbUrl := os.Getenv("DB_URL")
 	db.pool, db.stat = pgxpool.Connect(context.Background(), db.Host)
 	if db.stat != nil {
+		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
+			log.Warn("Too many connections!")
+			return db.stat
+		}
+
 		log.WithFields(log.Fields{
 			"Host": db.Host,
 			"stat": db.stat,
 			"rows": db.rows,
 			"data": db.data,
-		}).Error("Connection error.")
+		}).Fatal("Connection error.")
 		return db.stat
 	}
 
@@ -53,28 +62,41 @@ func (db *Database) createConn() error {
 
 func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 
-	db.locker.RLock()
-	defer db.locker.RUnlock()
+	db.Lock()
+	defer db.Unlock()
+	log.Info("[LOCKED]")
 
 	if db.createConn() != nil {
+		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
+			log.Warn("Too many connections!")
+			return nil, db.stat
+		}
+
 		log.WithFields(log.Fields{
 			"Host": db.Host,
 			"stat": db.stat,
 			"data": db.data,
 			"args": args,
 			"msg":  msg,
-		}).Error("Fail while was getting connection.")
+		}).Fatal("Fail while was getting connection.")
 		return nil, db.stat
 	}
 
+	defer db.pool.Close()
+
 	db.rows, db.stat = db.pool.Query(context.Background(), msg, args...)
 	if db.stat != nil {
+		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
+			log.Warn("Too many connections!")
+			return nil, db.stat
+		}
+
 		log.WithFields(log.Fields{
 			"stat": db.stat,
 			"data": db.data,
 			"args": args,
 			"msg":  msg,
-		}).Error("Rows get error.")
+		}).Fatal("Rows get error.")
 		return nil, db.stat
 	}
 	var data []interface{}

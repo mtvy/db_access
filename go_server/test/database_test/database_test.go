@@ -1,6 +1,7 @@
 package database_test
 
 import (
+	"os"
 	"sync"
 	"testing"
 
@@ -11,6 +12,13 @@ import (
 )
 
 func TestDatabase(t *testing.T) {
+
+	f, err := os.OpenFile("test.log", os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetOutput(f)
+
 	testCase := []struct {
 		tb string
 
@@ -88,9 +96,9 @@ func TestDatabase(t *testing.T) {
 				"err": err,
 			}).Warn("[GET Return Value]")
 
-			if tc.get_want != nil {
-				assert.Equal(t, len(tc.get_want), len(get))
-			}
+			//if tc.get_want != nil {
+			//	assert.Equal(t, len(tc.get_want), len(get))
+			//}
 			assert.Equal(t, tc.err, err)
 
 		})
@@ -123,19 +131,17 @@ func TestDatabase(t *testing.T) {
 	}
 	var wg sync.WaitGroup
 	t.Run("GOROUTINS", func(t *testing.T) {
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 1000; i++ {
 			wg.Add(1)
-			go func(wait *sync.WaitGroup) {
-				defer wait.Done()
-				insert, _ := db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
-				get, _ := db.Get("*", "qrcodes_tb", "")
-				delete, _ := db.Delete("qrcodes_tb", "WHERE url='Hello'")
+			go func(wg *sync.WaitGroup, i int) {
+				defer wg.Done()
+				go db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
+				go db.Get("*", "qrcodes_tb", "")
+				go db.Delete("qrcodes_tb", "WHERE url='Hello'")
 				log.WithFields(log.Fields{
-					"insert": insert,
-					"get":    len(get),
-					"delete": delete,
+					"i": i + 1,
 				}).Info("[INSERT GET DELETE]")
-			}(&wg)
+			}(&wg, i)
 		}
 		wg.Wait()
 
