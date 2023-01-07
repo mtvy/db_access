@@ -10,12 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	INSERT = "INSERT INTO qrcodes_tb (url, code_id, folder, name, path, initer, img_b) VALUES($1, $2, $3, $4, $5, $6, $7)"
-	DELETE = "DELETE FROM qrcodes_tb WHERE initer=$1"
-	GET    = "SELECT * FROM qrcodes_tb"
-)
-
 type ProcDb interface {
 	Insert(args ...any) ([]interface{}, error)
 	Delete(args ...any) ([]interface{}, error)
@@ -40,7 +34,6 @@ type Database struct {
 var ErrToManyClients = errors.New("FATAL: sorry, too many clients already (SQLSTATE 53300)")
 
 func (db *Database) createConn() error {
-	//dbUrl := os.Getenv("DB_URL")
 	db.pool, db.stat = pgxpool.Connect(context.Background(), db.Host)
 	if db.stat != nil {
 		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
@@ -113,10 +106,6 @@ func (db *Database) Insert(table string, columns string, values string) ([]inter
 	insert := "INSERT INTO " + table + " (" + columns + ") VALUES ( " + values + ")"
 
 	log.WithFields(log.Fields{
-		//"Host":      db.Host,
-		//"columns":   columns,
-		//"table":     table,
-		//"condition": condition,
 		"insert": insert,
 	}).Infoln("[New Request]")
 
@@ -128,9 +117,6 @@ func (db *Database) Delete(table string, condition string) ([]interface{}, error
 	delete := "DELETE FROM " + table + " " + condition
 
 	log.WithFields(log.Fields{
-		//"Host":      db.Host,
-		//"table":     table,
-		//"condition": condition,
 		"delete": delete,
 	}).Infoln("[New Request]")
 
@@ -142,10 +128,6 @@ func (db *Database) Get(columns string, table string, condition string) ([]inter
 	get := "SELECT " + columns + " FROM " + table + " " + condition
 
 	log.WithFields(log.Fields{
-		//"Host":      db.Host,
-		//"columns":   columns,
-		//"table":     table,
-		//"condition": condition,
 		"get": get,
 	}).Infoln("[New Request]")
 
