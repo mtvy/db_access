@@ -11,6 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// "postgres://username:password@localhost:5432/database_name"
+var db = database.Database{Host: "postgres://postgres:postgres@0.0.0.0:5432/postgres"}
+
 func TestDatabase(t *testing.T) {
 
 	f, err := os.OpenFile("test.log", os.O_WRONLY|os.O_CREATE, 0755)
@@ -18,6 +21,8 @@ func TestDatabase(t *testing.T) {
 		log.Fatal(err)
 	}
 	log.SetOutput(f)
+
+	t.Parallel()
 
 	testCase := []struct {
 		tb string
@@ -56,8 +61,6 @@ func TestDatabase(t *testing.T) {
 			insert_values:  "'Hello', 'World'",
 		},
 	}
-	// "postgres://username:password@localhost:5432/database_name"
-	db := database.Database{Host: "postgres://postgres:postgres@0.0.0.0:5432/postgres"}
 
 	for ind, tc := range testCase {
 		log.WithFields(log.Fields{
@@ -129,25 +132,67 @@ func TestDatabase(t *testing.T) {
 
 		log.Info("[DONE]")
 	}
-	var wg sync.WaitGroup
-	t.Run("GOROUTINS", func(t *testing.T) {
-		for i := 0; i < 1000; i++ {
-			wg.Add(1)
-			go func(wg *sync.WaitGroup, i int) {
-				defer wg.Done()
-				go db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
-				go db.Get("*", "qrcodes_tb", "")
-				go db.Delete("qrcodes_tb", "WHERE url='Hello'")
-				log.WithFields(log.Fields{
-					"i": i + 1,
-				}).Info("[INSERT GET DELETE]")
-			}(&wg, i)
-		}
-		wg.Wait()
+}
 
-		get, _ := db.Get("*", "qrcodes_tb", "")
-		log.WithFields(log.Fields{
-			"get": len(get),
-		}).Info("[DONE]")
-	})
+func BenchmarkRoutins(b *testing.B) {
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < b.N; i++ {
+		wg.Add(1)
+		go func(wg *sync.WaitGroup, i int) {
+			defer wg.Done()
+			go db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
+			go db.Get("*", "qrcodes_tb", "")
+			go db.Delete("qrcodes_tb", "WHERE url='Hello'")
+			log.WithFields(log.Fields{
+				"i": i + 1,
+			}).Info("[INSERT GET DELETE]")
+		}(&wg, i)
+	}
+	wg.Wait()
+
+	get, _ := db.Get("*", "qrcodes_tb", "")
+	log.WithFields(log.Fields{
+		"get": len(get),
+	}).Info("[DONE]")
+}
+
+func BenchmarkPlainRun(b *testing.B) {
+
+	db := database.Database{Host: "postgres://postgres:postgres@0.0.0.0:5432/postgres"}
+
+	for i := 0; i < b.N; i++ {
+		func(i int) {
+			db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
+			db.Get("*", "qrcodes_tb", "")
+			db.Delete("qrcodes_tb", "WHERE url='Hello'")
+			log.WithFields(log.Fields{
+				"i": i + 1,
+			}).Info("[INSERT GET DELETE]")
+		}(i)
+	}
+
+	get, _ := db.Get("*", "qrcodes_tb", "")
+	log.WithFields(log.Fields{
+		"get": len(get),
+	}).Info("[DONE]")
+}
+
+func BenchmarkInsert(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
+	}
+}
+
+func BenchmarkDelete(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		db.Delete("qrcodes_tb", "WHERE url='Hello'")
+	}
+}
+
+func BenchmarkGet(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		db.Get("*", "qrcodes_tb", "")
+	}
 }
