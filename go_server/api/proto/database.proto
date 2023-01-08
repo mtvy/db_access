@@ -11,7 +11,10 @@ service Database {
 }
 
 message GetDbRequest {
-    string tb = 1;
+    string columns = 1;
+    string table = 2;
+    string condition = 3;
+
 }
 
 message GetDbResponse {
@@ -21,9 +24,9 @@ message GetDbResponse {
 
 
 message InsertDbRequest {
-    string tb = 1;
-    repeated string colums = 2;
-    repeated string values = 3; // TODO: edit string type of vals
+    string table = 1;
+    string columns = 2;
+    string values = 3;
 }
 
 message InsertDbResponse {
@@ -31,8 +34,8 @@ message InsertDbResponse {
 }
 
 message DeleteDbRequest {
-    string tb = 1;
-    string where = 2; // <param1>='<val1>' AND ...
+    string table = 1;
+    string condition = 2;
 }
 
 message DeleteDbResponse {
