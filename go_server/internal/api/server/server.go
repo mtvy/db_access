@@ -13,8 +13,11 @@ type GRPCServer struct {
 }
 
 func (server *GRPCServer) GetDb(ctx context.Context, req *api.GetDbRequest) (*api.GetDbResponse, error) {
-	//status, data := server.db.Get()
-	return &api.GetDbResponse{}, nil
+	data, err := server.db.Get(req.Columns, req.Table, req.Condition)
+	if err != nil {
+		return &api.GetDbResponse{Status: err.Error(), Data: data}, nil
+	}
+	return &api.GetDbResponse{Status: "ok", Data: data}, nil
 }
 
 func (server *GRPCServer) InsertDb(ctx context.Context, req *api.GetDbRequest) (*api.GetDbResponse, error) {
