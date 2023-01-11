@@ -47,7 +47,7 @@ func (db *Database) createConn() error {
 			"stat": db.stat,
 			"rows": db.rows,
 			"data": db.data,
-		}).Fatal("Connection error.")
+		}).Error("Connection error.")
 		return db.stat
 	}
 
@@ -80,7 +80,7 @@ func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 			"data": db.data,
 			"args": args,
 			"msg":  msg,
-		}).Fatal("Fail while was getting connection.")
+		}).Error("Fail while was getting connection.")
 		return nil, db.stat
 	}
 
@@ -98,7 +98,7 @@ func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 			"data": db.data,
 			"args": args,
 			"msg":  msg,
-		}).Fatal("Rows get error.")
+		}).Error("Rows get error.")
 		return nil, db.stat
 	}
 	var data []interface{}

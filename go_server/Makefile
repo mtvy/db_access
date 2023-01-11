@@ -8,6 +8,16 @@ run:
 
 
 # - - - - - - - - - - - - - - - - -
+# Run Server
+# - - - - - - - - - - - - - - - - -
+up:
+	cd deployments && docker-compose up --build
+down:
+	cd deployments && docker-compose down
+# - - - - - - - - - - - - - - - - -
+
+
+# - - - - - - - - - - - - - - - - -
 # Building
 # - - - - - - - - - - - - - - - - -
 build: proto
@@ -15,6 +25,9 @@ build: proto
 proto:
 	source ~/.bash_profile
 	protoc -I ./api/proto --go_out=. --go-grpc_out=. ./api/proto/database.proto
+
+linux:
+	GOOS=linux GOARCH=amd64 go build -o ./build/package/main ./cmd/main.go
 # - - - - - - - - - - - - - - - - -
 
 
