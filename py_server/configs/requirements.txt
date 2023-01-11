@@ -1,0 +1,4 @@
+Flask==2.2.2
+python-dotenv==0.21.0
+grpcio==1.51.1
+grpcio-tools==1.51.1
