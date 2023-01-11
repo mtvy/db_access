@@ -179,6 +179,11 @@ func BenchmarkPlainRun(b *testing.B) {
 	}).Info("[DONE]")
 }
 
+func BechmarkConnections(b *testing.B) {
+	beched_db := database.Database{Host: "postgres://postgres:postgres@0.0.0.0:5432/postgres"}
+	beched_db.CloseConn()
+}
+
 func BenchmarkInsert(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")

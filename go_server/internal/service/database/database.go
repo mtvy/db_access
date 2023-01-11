@@ -19,6 +19,7 @@ type ProcDb interface {
 type Databaser interface {
 	createConn() error
 	sendReq(msg string, args ...any) ([]interface{}, error)
+	CloseConn() error
 }
 
 type Database struct {
@@ -53,6 +54,14 @@ func (db *Database) createConn() error {
 	return nil
 }
 
+func (db *Database) CloseConn() {
+	db.pool.Close()
+
+	/*
+		...
+	*/
+}
+
 func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 
 	db.Lock()
@@ -75,7 +84,7 @@ func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 		return nil, db.stat
 	}
 
-	defer db.pool.Close()
+	defer db.CloseConn()
 
 	db.rows, db.stat = db.pool.Query(context.Background(), msg, args...)
 	if db.stat != nil {

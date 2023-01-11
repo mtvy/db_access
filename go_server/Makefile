@@ -19,3 +19,10 @@ git:
 	git commit -m "$(COMMIT)"
 	git push
 
+
+bench_db_conn:
+	GOGC=off go test -bench=BechmarkConnections ./test/database_test -cpuprofile db_conn_cpu.out
+	go tool pprof --edgefraction=0 --nodefraction=0 --nodecount=100000 database_test.test db_conn_cpu.out
+	rm database_test.test db_conn_cpu.out
+
+
