@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import api.database_pb2 as database__pb2
+import api.grpc.database_pb2 as database__pb2
 
 
 class DatabaseStub(object):

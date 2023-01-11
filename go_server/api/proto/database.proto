@@ -14,6 +14,7 @@ message GetDbRequest {
     string columns = 1;
     string table = 2;
     string condition = 3;
+    string db_host = 4;
 
 }
 
@@ -27,6 +28,7 @@ message InsertDbRequest {
     string table = 1;
     string columns = 2;
     string values = 3;
+    string db_host = 4;
 }
 
 message InsertDbResponse {
@@ -36,6 +38,7 @@ message InsertDbResponse {
 message DeleteDbRequest {
     string table = 1;
     string condition = 2;
+    string db_host = 4;
 }
 
 message DeleteDbResponse {

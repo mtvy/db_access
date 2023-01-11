@@ -140,7 +140,7 @@ func BenchmarkRoutins(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		wg.Add(1)
-		go func(wg *sync.WaitGroup, i int) {
+		go func(i int) {
 			defer wg.Done()
 			go db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
 			go db.Get("*", "qrcodes_tb", "")
@@ -148,7 +148,7 @@ func BenchmarkRoutins(b *testing.B) {
 			logrus.WithFields(logrus.Fields{
 				"i": i + 1,
 			}).Info("[INSERT GET DELETE]")
-		}(&wg, i)
+		}(i)
 	}
 	wg.Wait()
 

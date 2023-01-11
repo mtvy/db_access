@@ -1,4 +1,7 @@
 
+run:
+	go run cmd/main.go --conf=config/config.yaml
+
 proto:
 	source ~/.bash_profile
 	protoc -I ./api/proto --go_out=. --go-grpc_out=. ./api/proto/database.proto
@@ -18,7 +21,6 @@ git:
 	git add .
 	git commit -m "$(COMMIT)"
 	git push
-
 
 bench_db_conn:
 	GOGC=off go test -bench=BechmarkConnections ./test/database_test -cpuprofile db_conn_cpu.out
