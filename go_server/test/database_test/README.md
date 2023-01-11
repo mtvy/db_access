@@ -18,3 +18,7 @@
     ```pprof
     (pprof) web
     ```
+- Race check
+    ```bash
+    go test -race ./database_test
+    ```

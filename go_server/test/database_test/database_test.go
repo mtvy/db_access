@@ -7,7 +7,7 @@ import (
 
 	"go_server/internal/service/database"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,9 +18,9 @@ func TestDatabase(t *testing.T) {
 
 	f, err := os.OpenFile("test.log", os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
-	log.SetOutput(f)
+	logrus.SetOutput(f)
 
 	t.Parallel()
 
@@ -63,7 +63,7 @@ func TestDatabase(t *testing.T) {
 	}
 
 	for ind, tc := range testCase {
-		log.WithFields(log.Fields{
+		logrus.WithFields(logrus.Fields{
 			"caseIndex": ind + 1,
 		}).Warn("[START]")
 
@@ -71,7 +71,7 @@ func TestDatabase(t *testing.T) {
 
 			get, err := db.Get("*", tc.tb, "")
 
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"len": len(get),
 				"err": err,
 			}).Warn("[GET Return Value]")
@@ -83,7 +83,7 @@ func TestDatabase(t *testing.T) {
 		t.Run("INSERT", func(t *testing.T) {
 			insert, err := db.Insert(tc.tb, tc.insert_columns, tc.insert_values)
 
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"got": insert,
 				"err": err,
 			}).Warn("[INSERT Return Value]")
@@ -94,7 +94,7 @@ func TestDatabase(t *testing.T) {
 
 			get, err := db.Get(tc.get_columns, tc.tb, tc.get_condition)
 
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"len": len(get),
 				"err": err,
 			}).Warn("[GET Return Value]")
@@ -109,7 +109,7 @@ func TestDatabase(t *testing.T) {
 		t.Run("DELETE", func(t *testing.T) {
 			delete, err := db.Delete(tc.tb, tc.del_condition)
 
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"len": delete,
 				"err": err,
 			}).Warn("[DELETE Return Value]")
@@ -121,7 +121,7 @@ func TestDatabase(t *testing.T) {
 
 			get, err := db.Get("*", tc.tb, "")
 
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"len": len(get),
 				"err": err,
 			}).Warn("[GET Return Value]")
@@ -130,7 +130,7 @@ func TestDatabase(t *testing.T) {
 
 		})
 
-		log.Info("[DONE]")
+		logrus.Info("[DONE]")
 	}
 }
 
@@ -145,7 +145,7 @@ func BenchmarkRoutins(b *testing.B) {
 			go db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
 			go db.Get("*", "qrcodes_tb", "")
 			go db.Delete("qrcodes_tb", "WHERE url='Hello'")
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"i": i + 1,
 			}).Info("[INSERT GET DELETE]")
 		}(&wg, i)
@@ -153,7 +153,7 @@ func BenchmarkRoutins(b *testing.B) {
 	wg.Wait()
 
 	get, _ := db.Get("*", "qrcodes_tb", "")
-	log.WithFields(log.Fields{
+	logrus.WithFields(logrus.Fields{
 		"get": len(get),
 	}).Info("[DONE]")
 }
@@ -167,14 +167,14 @@ func BenchmarkPlainRun(b *testing.B) {
 			db.Insert("qrcodes_tb", "url, name", "'Hello', 'World'")
 			db.Get("*", "qrcodes_tb", "")
 			db.Delete("qrcodes_tb", "WHERE url='Hello'")
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"i": i + 1,
 			}).Info("[INSERT GET DELETE]")
 		}(i)
 	}
 
 	get, _ := db.Get("*", "qrcodes_tb", "")
-	log.WithFields(log.Fields{
+	logrus.WithFields(logrus.Fields{
 		"get": len(get),
 	}).Info("[DONE]")
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type ProcDb interface {
@@ -37,11 +37,11 @@ func (db *Database) createConn() error {
 	db.pool, db.stat = pgxpool.Connect(context.Background(), db.Host)
 	if db.stat != nil {
 		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
-			log.Warn("Too many connections!")
+			logrus.Warn("Too many connections!")
 			return db.stat
 		}
 
-		log.WithFields(log.Fields{
+		logrus.WithFields(logrus.Fields{
 			"Host": db.Host,
 			"stat": db.stat,
 			"rows": db.rows,
@@ -57,15 +57,15 @@ func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 
 	db.Lock()
 	defer db.Unlock()
-	log.Info("[LOCKED]")
+	logrus.Info("[LOCKED]")
 
 	if db.createConn() != nil {
 		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
-			log.Warn("Too many connections!")
+			logrus.Warn("Too many connections!")
 			return nil, db.stat
 		}
 
-		log.WithFields(log.Fields{
+		logrus.WithFields(logrus.Fields{
 			"Host": db.Host,
 			"stat": db.stat,
 			"data": db.data,
@@ -80,11 +80,11 @@ func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 	db.rows, db.stat = db.pool.Query(context.Background(), msg, args...)
 	if db.stat != nil {
 		if errors.Unwrap(db.stat).Error() == ErrToManyClients.Error() {
-			log.Warn("Too many connections!")
+			logrus.Warn("Too many connections!")
 			return nil, db.stat
 		}
 
-		log.WithFields(log.Fields{
+		logrus.WithFields(logrus.Fields{
 			"stat": db.stat,
 			"data": db.data,
 			"args": args,
@@ -105,7 +105,7 @@ func (db *Database) sendReq(msg string, args ...any) ([]interface{}, error) {
 func (db *Database) Insert(table string, columns string, values string) ([]interface{}, error) {
 	insert := "INSERT INTO " + table + " (" + columns + ") VALUES ( " + values + ")"
 
-	log.WithFields(log.Fields{
+	logrus.WithFields(logrus.Fields{
 		"insert": insert,
 	}).Infoln("[New Request]")
 
@@ -116,7 +116,7 @@ func (db *Database) Delete(table string, condition string) ([]interface{}, error
 
 	delete := "DELETE FROM " + table + " " + condition
 
-	log.WithFields(log.Fields{
+	logrus.WithFields(logrus.Fields{
 		"delete": delete,
 	}).Infoln("[New Request]")
 
@@ -127,7 +127,7 @@ func (db *Database) Get(columns string, table string, condition string) ([]inter
 
 	get := "SELECT " + columns + " FROM " + table + " " + condition
 
-	log.WithFields(log.Fields{
+	logrus.WithFields(logrus.Fields{
 		"get": get,
 	}).Infoln("[New Request]")
 
